@@ -36,6 +36,10 @@
 
 #pragma once
 
+# if ELK_BUILD
+    // Needed for the timer call
+    #include "twine/twine.h"
+#endif
 namespace foleys
 {
 
@@ -188,8 +192,13 @@ public:
      */
     template<typename FloatType>
     void measureBlock (const juce::AudioBuffer<FloatType>& buffer)
-    {
-        lastMeasurement = juce::Time::currentTimeMillis();
+    {;
+        #if ELK_BUILD
+            // Use xenomai-compatible call
+            lastMeasurement = twine::current_rt_time().count();
+        #else
+            lastMeasurement = juce::Time::currentTimeMillis();
+        #endif
         if (! suspended)
         {
             const int         numChannels = buffer.getNumChannels ();
